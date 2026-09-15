@@ -1,0 +1,169 @@
+/* Local labels for iCloud Hide My Email aliases. */
+
+.icloud-alias-tags {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.icloud-alias-tags__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.icloud-alias-tags__list,
+.icloud-scope-alias-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+}
+
+.icloud-alias-tags__empty {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.icloud-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 4px 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  color: var(--text);
+  font-size: 11px;
+  line-height: 1.7;
+  max-width: 100%;
+}
+
+.icloud-tag-chip--static {
+  padding: 0 8px;
+  font-size: 10px;
+}
+
+.icloud-tag-chip__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icloud-tag-chip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+}
+
+.icloud-tag-chip button:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.icloud-tag-chip button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.icloud-alias-tags__add {
+  display: flex;
+  gap: 6px;
+}
+
+.icloud-alias-tags__add input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.icloud-alias-tags__add input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 1px;
+}
+
+.icloud-alias-tags__add button {
+  display: inline-flex;
+  width: 32px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.icloud-alias-tags__add button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* Tag filter inside the scope switcher alias list. */
+.icloud-scope-tag-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 8px;
+}
+
+.icloud-scope-tag-filter input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.icloud-scope-tag-filter input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 1px;
+}
+
+.icloud-scope-tag-filter button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.icloud-scope-alias-tags {
+  margin-top: 2px;
+}
+
+/* Add/remove panel shown under the active alias in the mail list. */
+.icloud-alias-tags-panel {
+  padding: 2px 16px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.icloud-scope-empty-hint {
+  margin: 4px 2px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}

@@ -16,6 +16,12 @@ import {
   updateICloudAppPassword,
   updateICloudCookies,
 } from './icloud-api'
+import {
+  addICloudAliasTag,
+  listICloudAliasTags,
+  listICloudTags,
+  removeICloudAliasTag,
+} from './icloud-tag-api'
 
 export const iCloudRoutes = new Hono<AppContext>()
 
@@ -78,6 +84,28 @@ iCloudRoutes.post('/icloud/aliases', (context) => (
 ))
 iCloudRoutes.post('/icloud/aliases/preview', (context) => (
   previewICloudAlias(context.env, context.get('user'), context.req.raw)
+))
+iCloudRoutes.get('/icloud/tags', (context) => (
+  listICloudTags(context.env, context.get('user'), context.req.raw)
+))
+iCloudRoutes.get('/icloud/aliases/tags', (context) => (
+  listICloudAliasTags(context.env, context.get('user'), context.req.raw)
+))
+iCloudRoutes.post('/icloud/aliases/tags', (context) => (
+  addICloudAliasTag(
+    context.env,
+    context.get('user'),
+    context.req.raw,
+    clientIp(context.req.raw.headers),
+  )
+))
+iCloudRoutes.delete('/icloud/aliases/tags', (context) => (
+  removeICloudAliasTag(
+    context.env,
+    context.get('user'),
+    context.req.raw,
+    clientIp(context.req.raw.headers),
+  )
 ))
 iCloudRoutes.patch('/icloud/aliases/:anonymousId', (context) => (
   updateICloudAlias(

@@ -128,8 +128,9 @@ describe('D1 migration check', () => {
 
     await ensureSchema(fixture.db)
 
-    expect(fixture.batch).toHaveBeenCalledOnce()
+    expect(fixture.batch).toHaveBeenCalledTimes(2)
     expect(fixture.applied.has('0037_mail_notification_versions.sql')).toBe(true)
+    expect(fixture.applied.has('0038_icloud_alias_tags.sql')).toBe(true)
   })
 
   it('recovers from 0035 through read optimization and notification versions', async () => {
@@ -137,11 +138,12 @@ describe('D1 migration check', () => {
 
     await ensureSchema(fixture.db)
 
-    expect(fixture.batch).toHaveBeenCalledTimes(2)
+    expect(fixture.batch).toHaveBeenCalledTimes(3)
     expect(fixture.applied.has('0032_netease_mail.sql')).toBe(false)
     expect(fixture.applied.has('0033_naver_mail_imap.sql')).toBe(true)
     expect(fixture.applied.has('0034_yandex_mail_imap.sql')).toBe(true)
     expect(fixture.applied.has('0037_mail_notification_versions.sql')).toBe(true)
+    expect(fixture.applied.has('0038_icloud_alias_tags.sql')).toBe(true)
   })
 
   it('applies current migrations when a test database already recorded NetEase 0032', async () => {
@@ -151,7 +153,7 @@ describe('D1 migration check', () => {
 
     await ensureSchema(fixture.db)
 
-    expect(fixture.batch).toHaveBeenCalledTimes(2)
+    expect(fixture.batch).toHaveBeenCalledTimes(3)
     expect(fixture.applied.has('0032_netease_mail.sql')).toBe(true)
     expect(fixture.applied.has('0033_naver_mail_imap.sql')).toBe(true)
     expect(fixture.applied.has('0034_yandex_mail_imap.sql')).toBe(true)
@@ -159,9 +161,9 @@ describe('D1 migration check', () => {
   })
 
   it.each([
-    ['2026-07-29-p5-outbound-rate-limit-admin', 14, 23],
-    ['2026-08-01-p2-translation-permissions', 16, 21],
-    ['2026-08-03-p3-multiple-drafts', 17, 20],
+    ['2026-07-29-p5-outbound-rate-limit-admin', 14, 24],
+    ['2026-08-01-p2-translation-permissions', 16, 22],
+    ['2026-08-03-p3-multiple-drafts', 17, 21],
   ])('recovers legacy schema %s through migration 0037', async (
     legacyVersion,
     baseline,
@@ -172,7 +174,7 @@ describe('D1 migration check', () => {
 
     expect(fixture.batch).toHaveBeenCalledTimes(batchCount)
     expect(fixture.batches[0]).toHaveLength(baseline + 1)
-    expect(fixture.applied.size).toBe(36)
+    expect(fixture.applied.size).toBe(37)
     expect(fixture.applied.has('0020_device_token_scopes.sql')).toBe(true)
     expect(fixture.applied.has('0021_icloud_accounts.sql')).toBe(true)
     expect(fixture.applied.has('0022_consistency_guards.sql')).toBe(true)
@@ -212,6 +214,9 @@ describe('D1 migration check', () => {
     expect(fixture.prepare.mock.calls.some(([sql]) => (
       String(sql).includes('CREATE TABLE IF NOT EXISTS yandex_mail_accounts')
     ))).toBe(true)
+    expect(fixture.prepare.mock.calls.some(([sql]) => (
+      String(sql).includes('CREATE TABLE IF NOT EXISTS icloud_alias_tags')
+    ))).toBe(true)
   })
 
   it('repairs migration records left empty by an earlier failed Wrangler run', async () => {
@@ -222,7 +227,7 @@ describe('D1 migration check', () => {
 
     await ensureSchema(fixture.db)
 
-    expect(fixture.applied.size).toBe(36)
+    expect(fixture.applied.size).toBe(37)
     expect(fixture.batches[0]).toHaveLength(18)
   })
 
@@ -251,7 +256,7 @@ describe('D1 migration check', () => {
     expect(fixture.prepare).not.toHaveBeenCalledWith(
       "ALTER TABLE device_sessions ADD COLUMN scopes TEXT NOT NULL DEFAULT '*'",
     )
-    expect(fixture.batch).toHaveBeenCalledTimes(2)
+    expect(fixture.batch).toHaveBeenCalledTimes(3)
   })
 
   it('accepts a concurrent migration completed by another isolate', async () => {
@@ -261,7 +266,7 @@ describe('D1 migration check', () => {
     })
 
     await expect(ensureSchema(fixture.db)).resolves.toBeUndefined()
-    expect(fixture.batch).toHaveBeenCalledOnce()
+    expect(fixture.batch).toHaveBeenCalledTimes(2)
   })
 
   it('drops a rejected cached check so the next request can retry', async () => {
@@ -272,6 +277,6 @@ describe('D1 migration check', () => {
 
     await expect(ensureSchema(fixture.db)).rejects.toThrow('0037_mail_notification_versions.sql')
     await expect(ensureSchema(fixture.db)).resolves.toBeUndefined()
-    expect(fixture.batch).toHaveBeenCalledTimes(2)
+    expect(fixture.batch).toHaveBeenCalledTimes(3)
   })
 })

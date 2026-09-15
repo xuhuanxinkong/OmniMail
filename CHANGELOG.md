@@ -5,6 +5,21 @@
 后续 Web、OmniMail Float 与 Android 分别使用 `vX.Y.Z`、`float-vX.Y.Z` 和
 `android-vX.Y.Z`，三套版本号互不影响；以下既有历史记录保持不变。
 
+## [Unreleased]
+
+- iCloud 隐藏邮箱新增本地标签：可为每个隐藏邮箱贴多个自定义标签，记录其注册用途；
+  标签仅保存在自建实例的 D1 中，不会同步给 Apple。
+- 隐藏邮箱切换面板支持按标签筛选，并在每个地址下展示已贴标签；地址操作区新增
+  添加、移除标签的输入框与按钮。
+- 新增四个接口：`GET /api/icloud/tags`、`GET /api/icloud/aliases/tags`、
+  `POST /api/icloud/aliases/tags`、`DELETE /api/icloud/aliases/tags`，并同步更新 API 参考文档。
+
+### 升级说明
+
+- 新增 D1 迁移 `0038_icloud_alias_tags.sql`（创建 `icloud_alias_tags` 表）。使用
+  `npm run deploy` 升级即可自动执行迁移；单独运行 `npx wrangler deploy` 不会建表。
+- 不新增变量、Secret 或资源绑定；删除 iCloud 账号或隐藏邮箱时，其本地标签随外键级联清理。
+
 ## [1.1.2] - 2026-09-15
 
 - 修复已配置有效邮箱密钥后，NAVER 和 Yandex 仍提示未启用的问题；移除两个额外的 IMAP 环境开关。

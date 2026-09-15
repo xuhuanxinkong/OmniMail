@@ -2,14 +2,9 @@ import { NOTIFICATION_MIGRATION, NOTIFICATION_RECOVERY } from './schema-migratio
 import { MESSAGE_READ_MIGRATION, MESSAGE_READ_RECOVERY } from './schema-migration-message-reads'
 import { NAVER_MAIL_MIGRATION, NAVER_MAIL_RECOVERY } from './schema-migration-naver'
 import { YANDEX_MAIL_MIGRATION, YANDEX_MAIL_RECOVERY } from './schema-migration-yandex'
-import {
-  QQ_MAIL_IDENTITIES_MIGRATION,
-  QQ_MAIL_IDENTITIES_RECOVERY,
-} from './schema-migration-qq-identities'
-import {
-  EXTERNAL_MAIL_INDEX_MIGRATION,
-  EXTERNAL_MAIL_INDEX_RECOVERY,
-} from './schema-migration-external-mail'
+import { QQ_MAIL_IDENTITIES_MIGRATION, QQ_MAIL_IDENTITIES_RECOVERY } from './schema-migration-qq-identities'
+import { EXTERNAL_MAIL_INDEX_MIGRATION, EXTERNAL_MAIL_INDEX_RECOVERY } from './schema-migration-external-mail'
+import { ICLOUD_ALIAS_TAGS_MIGRATION, ICLOUD_ALIAS_TAGS_RECOVERY } from './schema-migration-icloud-tags'
 
 const ICLOUD_MIGRATION = '0021_icloud_accounts.sql'
 const CONSISTENCY_MIGRATION = '0022_consistency_guards.sql'
@@ -57,6 +52,7 @@ export const WRANGLER_MIGRATION_NAMES = [
   NAVER_MAIL_MIGRATION,
   YANDEX_MAIL_MIGRATION,
   EXTERNAL_MAIL_INDEX_MIGRATION, MESSAGE_READ_MIGRATION,
+  ICLOUD_ALIAS_TAGS_MIGRATION,
   REQUIRED_MIGRATION,
 ] as const
 export const LEGACY_BASELINES: Record<string, number> = {
@@ -597,4 +593,5 @@ export const RECOVERABLE_MIGRATIONS = [
   YANDEX_MAIL_RECOVERY,
   EXTERNAL_MAIL_INDEX_RECOVERY,
   MESSAGE_READ_RECOVERY, NOTIFICATION_RECOVERY,
+  ICLOUD_ALIAS_TAGS_RECOVERY,
 ] as const

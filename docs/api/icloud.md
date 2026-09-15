@@ -8,7 +8,7 @@ iCloud 账号、凭据、隐藏地址和按需收件箱。
 
 > iCloud accounts, credentials, aliases, and on-demand inbox access.
 
-本分类共 **13** 个端点。返回 [完整 API 索引](README.md) 或 [API 架构与安全说明](../API.md)。
+本分类共 **17** 个端点。返回 [完整 API 索引](README.md) 或 [API 架构与安全说明](../API.md)。
 
 <!-- endpoint:GET /api/icloud/accounts catalog:82cd25d54b99 -->
 ## `GET /api/icloud/accounts`
@@ -252,6 +252,110 @@ curl --request POST \
   "label": "Shopping",
   "email": "suggested@icloud.com",
   "previewId": "00000000-0000-4000-8000-000000000001"
+}'
+```
+
+<!-- endpoint:GET /api/icloud/tags catalog:f12d8971a9c6 -->
+## `GET /api/icloud/tags`
+
+**列出隐藏邮箱标签 / List Hide My Email tags**
+
+返回该 iCloud 账户下去重后的全部本地标签，用于标签筛选建议。
+
+> Return the account’s de-duplicated local tags for filter suggestions.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 登录用户；支持 Session Cookie 或 Access Token |
+| 请求 | Query · accountId |
+| 成功响应 | 200 · { tags } |
+
+### cURL 示例
+
+```bash
+curl --request GET \
+  --url "https://mail.example.com/api/icloud/tags?accountId=icloud_account_id" \
+  --header "Authorization: Bearer om_at_..."
+```
+
+<!-- endpoint:GET /api/icloud/aliases/tags catalog:aa36dba5d4eb -->
+## `GET /api/icloud/aliases/tags`
+
+**读取隐藏邮箱标签映射 / Read the alias tag map**
+
+返回该账户下每个隐藏邮箱地址到其本地标签数组的映射。
+
+> Return a map of each alias email to its local tag names for the account.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 登录用户；支持 Session Cookie 或 Access Token |
+| 请求 | Query · accountId |
+| 成功响应 | 200 · { tags } |
+
+### cURL 示例
+
+```bash
+curl --request GET \
+  --url "https://mail.example.com/api/icloud/aliases/tags?accountId=icloud_account_id" \
+  --header "Authorization: Bearer om_at_..."
+```
+
+<!-- endpoint:POST /api/icloud/aliases/tags catalog:ceda0e29ba35 -->
+## `POST /api/icloud/aliases/tags`
+
+**为隐藏邮箱添加标签 / Add a tag to an alias**
+
+给指定隐藏邮箱添加一个本地标签；重复添加已存在的标签不会报错。
+
+> Add a local tag to an alias; re-adding an existing tag is a no-op.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 登录用户；支持 Session Cookie 或 Access Token |
+| 请求 | JSON · accountId, aliasEmail, tagName |
+| 成功响应 | 201 · { ok: true, aliasEmail, tagName } |
+
+### cURL 示例
+
+```bash
+curl --request POST \
+  --url "https://mail.example.com/api/icloud/aliases/tags" \
+  --header "Authorization: Bearer om_at_..." \
+  --header "Content-Type: application/json" \
+  --data '{
+  "accountId": "icloud_account_id",
+  "aliasEmail": "abc123@icloud.com",
+  "tagName": "GitHub"
+}'
+```
+
+<!-- endpoint:DELETE /api/icloud/aliases/tags catalog:3fcb58280727 -->
+## `DELETE /api/icloud/aliases/tags`
+
+**移除隐藏邮箱标签 / Remove a tag from an alias**
+
+从指定隐藏邮箱移除一个本地标签。
+
+> Remove a local tag from an alias.
+
+| 项目 | 内容 |
+| --- | --- |
+| 认证 | 登录用户；支持 Session Cookie 或 Access Token |
+| 请求 | JSON · accountId, aliasEmail, tagName |
+| 成功响应 | 200 · { ok: true } |
+
+### cURL 示例
+
+```bash
+curl --request DELETE \
+  --url "https://mail.example.com/api/icloud/aliases/tags" \
+  --header "Authorization: Bearer om_at_..." \
+  --header "Content-Type: application/json" \
+  --data '{
+  "accountId": "icloud_account_id",
+  "aliasEmail": "abc123@icloud.com",
+  "tagName": "GitHub"
 }'
 ```
 

@@ -1,7 +1,8 @@
 import { ArrowUpDown, AtSign, Check, ChevronDown, Cloud, Copy, Inbox, Mail, Settings2, X } from 'lucide-react'
 import { useEffect, useEffectEvent, useId, useMemo, useRef, useState } from 'react'
-import type { ICloudAccount, ICloudAlias } from '../../../shared/api'
+import type { ICloudAccount, ICloudAlias, ICloudAliasTagMap } from '../../../shared/api'
 import { t } from '../../../shared/i18n'
+import '../styles/icloud-tags.css'
 
 export type ICloudAliasSort = 'label' | 'newest' | 'email'
 
@@ -37,6 +38,7 @@ export function sortICloudAliases(aliases: ICloudAlias[], sort: ICloudAliasSort)
 export function ICloudScopeSwitcher({
   accounts,
   aliases,
+  aliasTags = {},
   selectedAccountId,
   selectedAlias,
   onAccountChange,
@@ -46,6 +48,7 @@ export function ICloudScopeSwitcher({
 }: {
   accounts: ICloudAccount[]
   aliases: ICloudAlias[]
+  aliasTags?: ICloudAliasTagMap
   selectedAccountId: string
   selectedAlias: string
   onAccountChange: (id: string) => void
@@ -66,6 +69,19 @@ export function ICloudScopeSwitcher({
   const account = accounts.find((item) => item.id === selectedAccountId)
   const selectedSort = aliasSortOptions.find((option) => option.value === aliasSort)!
   const sortedAliases = useMemo(() => sortICloudAliases(aliases, aliasSort), [aliases, aliasSort])
+  const [tagFilter, setTagFilter] = useState('')
+  const tagFilterId = useId()
+  const knownTags = useMemo(
+    () => [...new Set(Object.values(aliasTags).flat())].sort((left, right) => aliasCollator.compare(left, right)),
+    [aliasTags],
+  )
+  const visibleAliases = useMemo(() => {
+    const needle = tagFilter.trim().toLowerCase()
+    if (!needle) return sortedAliases
+    return sortedAliases.filter((alias) => (
+      (aliasTags[alias.email] || []).some((tag) => tag.toLowerCase().includes(needle))
+    ))
+  }, [sortedAliases, aliasTags, tagFilter])
 
   function finishClose(afterClose?: () => void, restoreFocus = true) {
     closeTimer.current = null
@@ -214,6 +230,18 @@ export function ICloudScopeSwitcher({
                   </div>}
                 </div>
               </div>
+              {knownTags.length > 0 && <div className="icloud-scope-tag-filter">
+                <input type="text" value={tagFilter} list={tagFilterId}
+                  placeholder={t('按标签筛选')} aria-label={t('按标签筛选隐藏邮箱')}
+                  onChange={(event) => setTagFilter(event.target.value)} />
+                <datalist id={tagFilterId}>
+                  {knownTags.map((tag) => <option value={tag} key={tag} />)}
+                </datalist>
+                {tagFilter && <button type="button" onClick={() => setTagFilter('')}
+                  aria-label={t('清除标签筛选')} data-tooltip={t('清除筛选')}>
+                  <X size={14} aria-hidden="true" />
+                </button>}
+              </div>}
               <button className={`icloud-scope-option${!selectedAlias ? ' is-selected' : ''}`} type="button"
                 onClick={() => close(() => onAliasChange(''))}>
                 <span className="icloud-scope-icon"><Inbox size={16} /></span>
@@ -235,23 +263,37 @@ export function ICloudScopeSwitcher({
                   <Copy size={15} aria-hidden="true" />
                 </button>
               </div>}
-              {sortedAliases.map((alias) => (
-                <div className={`icloud-scope-alias${alias.email === selectedAlias ? ' is-selected' : ''}`}
-                  key={alias.anonymousId || alias.email}>
-                  <button className="icloud-scope-option" type="button"
-                    onClick={() => close(() => onAliasChange(alias.email))}>
-                    <span className="icloud-scope-icon"><AtSign size={16} /></span>
-                    <span><strong>{alias.label || t('未命名地址')}</strong><small>{alias.email}</small></span>
-                    {alias.email === selectedAlias && <Check size={15} />}
-                  </button>
-                  <button className="icloud-scope-copy" type="button"
-                    onClick={() => void onAliasCopy(alias.email)}
-                    aria-label={t('复制邮箱地址：{address}', { address: alias.email })}
-                    data-tooltip={t('复制')}>
-                    <Copy size={15} aria-hidden="true" />
-                  </button>
-                </div>
-              ))}
+              {visibleAliases.map((alias) => {
+                const tags = aliasTags[alias.email] || []
+                return (
+                  <div className={`icloud-scope-alias${alias.email === selectedAlias ? ' is-selected' : ''}`}
+                    key={alias.anonymousId || alias.email}>
+                    <button className="icloud-scope-option" type="button"
+                      onClick={() => close(() => onAliasChange(alias.email))}>
+                      <span className="icloud-scope-icon"><AtSign size={16} /></span>
+                      <span>
+                        <strong>{alias.label || t('未命名地址')}</strong>
+                        <small>{alias.email}</small>
+                        {tags.length > 0 && <span className="icloud-scope-alias-tags">
+                          {tags.map((tag) => (
+                            <span className="icloud-tag-chip icloud-tag-chip--static" key={tag}>{tag}</span>
+                          ))}
+                        </span>}
+                      </span>
+                      {alias.email === selectedAlias && <Check size={15} />}
+                    </button>
+                    <button className="icloud-scope-copy" type="button"
+                      onClick={() => void onAliasCopy(alias.email)}
+                      aria-label={t('复制邮箱地址：{address}', { address: alias.email })}
+                      data-tooltip={t('复制')}>
+                      <Copy size={15} aria-hidden="true" />
+                    </button>
+                  </div>
+                )
+              })}
+              {!visibleAliases.length && tagFilter && <p className="icloud-scope-empty-hint">
+                {t('没有匹配该标签的隐藏邮箱')}
+              </p>}
             </section>
           </div>
         </div>

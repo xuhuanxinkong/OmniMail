@@ -27,6 +27,7 @@ import {
   api,
   type ICloudAccount,
   type ICloudAlias,
+  type ICloudAliasTagMap,
   type ICloudMessage,
 } from '../../../shared/api'
 import { errorMessage } from '../../../shared/api/errorMessage'
@@ -52,6 +53,7 @@ import {
   ICloudAccountSettingsDialog,
 } from './ICloudAccountDialogs'
 import { ICloudScopeSwitcher } from './ICloudScopeSwitcher'
+import { ICloudAliasTags } from './ICloudAliasTags'
 import { ICloudReader } from './ICloudReader'
 import { ICloudSearchField } from './ICloudSearchField'
 import { ICloudAliasBatchForm } from './ICloudAliasBatchForm'
@@ -84,6 +86,7 @@ export function ICloudWorkspace({ userId, enabled, remoteImagesEnabled }: {
   const [accounts, setAccounts] = useState<ICloudAccount[]>([])
   const [selectedId, setSelectedId] = useState(pendingDeepLink.current?.accountId || '')
   const [aliases, setAliases] = useState<ICloudAlias[]>([])
+  const [aliasTags, setAliasTags] = useState<ICloudAliasTagMap>({})
   const [selectedAlias, setSelectedAlias] = useState('')
   const [messages, setMessages] = useState<ICloudMessage[]>([])
   const [inboxMethod, setInboxMethod] = useState<'imap' | 'web' | ''>('')
@@ -139,6 +142,17 @@ export function ICloudWorkspace({ userId, enabled, remoteImagesEnabled }: {
       if (current === accountsRequestId.current) setLoading(false)
     }
   }, [enabled])
+
+  const loadAliasTags = useCallback(async () => {
+    const id = selectedId
+    if (!id || !selected?.hasCookies) { setAliasTags({}); return }
+    try {
+      const result = await api.iCloudAliasTags(id)
+      setAliasTags(result.tags)
+    } catch {
+      // Local tags are best-effort; keep the current map on failure.
+    }
+  }, [selectedId, selected?.hasCookies])
 
   const sync = useCallback(async (alias = selectedAlias, forceInbox = false) => {
     const id = selectedId
@@ -232,6 +246,7 @@ export function ICloudWorkspace({ userId, enabled, remoteImagesEnabled }: {
 
   useEffect(() => activateICloudMailCacheUser(userId), [userId])
   useEffect(() => { void loadAccounts() }, [loadAccounts])
+  useEffect(() => { void loadAliasTags() }, [loadAliasTags, aliases])
   useEffect(() => {
     const timer = window.setTimeout(() => setSearchQuery(query.trim()), 300)
     return () => window.clearTimeout(timer)
@@ -240,7 +255,7 @@ export function ICloudWorkspace({ userId, enabled, remoteImagesEnabled }: {
     aliasController.current?.abort(); inboxController.current?.abort()
     messageController.current?.abort(); messageRequestId.current += 1
     aliasRequestId.current += 1; inboxRequestId.current += 1
-    setAliases([]); setMessages([]); setInboxMethod(''); setSelectedAlias(''); setOpened(null)
+    setAliases([]); setAliasTags({}); setMessages([]); setInboxMethod(''); setSelectedAlias(''); setOpened(null)
   }, [selectedId])
   const syncSelectedAccount = useEffectEvent(() => { if (selectedId) void sync() })
   const loadSelectedInbox = useEffectEvent(() => { if (selectedId) void loadInbox() })
@@ -336,6 +351,7 @@ export function ICloudWorkspace({ userId, enabled, remoteImagesEnabled }: {
         <header className="list-header icloud-list-header">
           <div>
             {accounts.length ? <ICloudScopeSwitcher accounts={accounts} aliases={aliases}
+              aliasTags={aliasTags}
               selectedAccountId={selectedId} selectedAlias={selectedAlias}
               onAccountChange={setSelectedId} onAliasChange={setSelectedAlias}
               onAliasCopy={copyAlias} onAccountSettings={setCredentials} />
@@ -379,6 +395,10 @@ export function ICloudWorkspace({ userId, enabled, remoteImagesEnabled }: {
             <button type="button" onClick={() => void aliasAction(activeAlias, activeAlias.active ? 'deactivate' : 'reactivate')} aria-label={t(activeAlias.active ? '停用' : '恢复')} data-tooltip={t(activeAlias.active ? '停用' : '恢复')}>{activeAlias.active ? <PowerOff size={14} /> : <Power size={14} />}</button>
             <button className="is-danger" type="button" onClick={() => void aliasAction(activeAlias, 'delete')} aria-label={t('删除')} data-tooltip={t('删除')}><Trash2 size={14} /></button>
           </div>
+        </div>}
+        {activeAlias && selected && <div className="icloud-alias-tags-panel">
+          <ICloudAliasTags account={selected} aliasEmail={activeAlias.email}
+            tags={aliasTags[activeAlias.email] || []} onChanged={loadAliasTags} onError={setError} />
         </div>}
         {activeMainAddress && <div className="icloud-list-context">
           <span><AtSign size={16} aria-hidden="true" /></span>

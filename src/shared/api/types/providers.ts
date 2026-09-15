@@ -24,6 +24,9 @@ export interface ICloudAlias {
   createdAt?: string
 }
 
+// Local, user-defined labels for Hide My Email aliases, keyed by alias email.
+export type ICloudAliasTagMap = Record<string, string[]>
+
 export interface ICloudMessage {
   id: string
   from: string

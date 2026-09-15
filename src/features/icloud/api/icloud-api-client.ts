@@ -1,4 +1,4 @@
-import type { ICloudAccount, ICloudAlias, ICloudHost, ICloudMessage } from '../../../shared/api/api-types'
+import type { ICloudAccount, ICloudAlias, ICloudAliasTagMap, ICloudHost, ICloudMessage } from '../../../shared/api/api-types'
 
 type Request = <T>(path: string, init?: RequestInit) => Promise<T>
 
@@ -80,6 +80,24 @@ export function createICloudApi(request: Request, jsonBody: (value: unknown) => 
         `/api/icloud/inbox/${encodeURIComponent(uid)}?accountId=${encodeURIComponent(accountId)}`,
         { signal },
       )
+    ),
+    iCloudTags: (accountId: string, signal?: AbortSignal) => request<{ tags: string[] }>(
+      `/api/icloud/tags?accountId=${encodeURIComponent(accountId)}`,
+      { signal },
+    ),
+    iCloudAliasTags: (accountId: string, signal?: AbortSignal) => request<{ tags: ICloudAliasTagMap }>(
+      `/api/icloud/aliases/tags?accountId=${encodeURIComponent(accountId)}`,
+      { signal },
+    ),
+    addICloudAliasTag: (accountId: string, aliasEmail: string, tagName: string) => (
+      request<{ ok: true; aliasEmail: string; tagName: string }>('/api/icloud/aliases/tags', {
+        method: 'POST', body: jsonBody({ accountId, aliasEmail, tagName }),
+      })
+    ),
+    removeICloudAliasTag: (accountId: string, aliasEmail: string, tagName: string) => (
+      request<{ ok: true }>('/api/icloud/aliases/tags', {
+        method: 'DELETE', body: jsonBody({ accountId, aliasEmail, tagName }),
+      })
     ),
   }
 }
